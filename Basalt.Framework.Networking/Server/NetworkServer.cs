@@ -1,4 +1,5 @@
 ﻿using Basalt.Framework.Networking.Extensions;
+using Basalt.Framework.Networking.Serializers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -8,6 +9,8 @@ namespace Basalt.Framework.Networking.Server;
 
 public class NetworkServer
 {
+    private readonly ISerializer _serializer = new SimpleTextSerializer();
+
     private readonly TcpListener _listener;
     public bool IsActive { get; private set; }
 
@@ -39,10 +42,12 @@ public class NetworkServer
         IsActive = false;
     }
 
-    public void Send(string ip, byte[] data)
+    public void Send(string ip, BasePacket packet)
     {
         if (!IsActive)
             throw new NetworkSendException();
+
+        byte[] data = _serializer.Serialize(packet);
 
         if (_clients.TryGetValue(ip, out TcpClient? client))
         {
@@ -50,10 +55,12 @@ public class NetworkServer
         }
     }
 
-    public void Broadcast(byte[] data)
+    public void Broadcast(BasePacket packet)
     {
         if (!IsActive)
             throw new NetworkSendException();
+
+        byte[] data = _serializer.Serialize(packet);
 
         foreach (var client in _clients.Values)
         {
@@ -87,7 +94,8 @@ public class NetworkServer
             byte[] buffer = new byte[kvp.Value.Available];
             kvp.Value.Client.Receive(buffer, 0, buffer.Length, SocketFlags.None);
             
-            OnDataReceived?.Invoke(kvp.Key, buffer);
+            BasePacket packet = _serializer.Deserialize(buffer);
+            OnPacketReceived?.Invoke(kvp.Key, packet);
         }
     }
 
@@ -105,6 +113,9 @@ public class NetworkServer
         _clients.Remove(ip);
     }
 
-    public delegate void ReceiveDelegate(string ip, byte[] data);
-    public event ReceiveDelegate? OnDataReceived;
+    //public delegate void ReceiveDelegate(string ip, byte[] data);
+    //public event ReceiveDelegate? OnDataReceived;
+
+    public delegate void ReceiveDelegate(string ip, BasePacket packet);
+    public event ReceiveDelegate? OnPacketReceived;
 }

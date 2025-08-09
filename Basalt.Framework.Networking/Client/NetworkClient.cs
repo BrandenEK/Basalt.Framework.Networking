@@ -1,10 +1,13 @@
 ﻿using Basalt.Framework.Networking.Extensions;
+using Basalt.Framework.Networking.Serializers;
 using System.Net.Sockets;
 
 namespace Basalt.Framework.Networking.Client;
 
 public class NetworkClient
 {
+    private readonly ISerializer _serializer = new SimpleTextSerializer();
+
     private readonly TcpClient _client;
     public bool IsActive { get; private set; }
 
@@ -30,13 +33,14 @@ public class NetworkClient
         IsActive = false;
     }
 
-    public void Send(byte[] data)
+    public void Send(BasePacket packet)
     {
         CheckConnectionStatus();
 
         if (!IsActive)
             throw new NetworkSendException();
 
+        byte[] data = _serializer.Serialize(packet);
         _client.GetStream().Write(data, 0, data.Length);
     }
 
@@ -53,7 +57,8 @@ public class NetworkClient
         byte[] buffer = new byte[_client.Available];
         _client.Client.Receive(buffer, 0, buffer.Length, SocketFlags.None);
 
-        OnDataReceived?.Invoke(buffer);
+        BasePacket packet = _serializer.Deserialize(buffer);
+        OnPacketReceived?.Invoke(packet);
     }
 
     private void CheckConnectionStatus()
@@ -64,6 +69,6 @@ public class NetworkClient
         }
     }
 
-    public delegate void ReceiveDelegate(byte[] data);
-    public event ReceiveDelegate? OnDataReceived;
+    public delegate void ReceiveDelegate(BasePacket packet);
+    public event ReceiveDelegate? OnPacketReceived;
 }

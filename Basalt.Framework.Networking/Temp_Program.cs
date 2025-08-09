@@ -1,7 +1,7 @@
 ﻿using Basalt.Framework.Networking.Client;
+using Basalt.Framework.Networking.Serializers;
 using Basalt.Framework.Networking.Server;
 using System;
-using System.Text;
 
 namespace Basalt.Framework.Networking;
 
@@ -21,20 +21,26 @@ internal class Temp_Program
         Console.Title = "Networking client";
 
         var client = new NetworkClientWithThread("localhost", 33000, 1000);
-        client.OnDataReceived += Client_OnDataReceived;
+        client.OnPacketReceived += Client_OnDataReceived;
 
         Temp_Logger.Info($"Connected client to {client.Ip}:{client.Port}");
 
         while (true)
         {
             string input = Console.ReadLine()!;
-            client.Send(Encoding.UTF8.GetBytes(input));
+            client.Send(new TextPacket()
+            {
+                Text = input
+            });
         }
     }
 
-    private static void Client_OnDataReceived(byte[] data)
+    private static void Client_OnDataReceived(BasePacket packet)
     {
-        Temp_Logger.Warn($"[SERVER] {Encoding.UTF8.GetString(data)}");
+        if (packet is not TextPacket tpacket)
+            throw new Exception("only text");
+
+        Temp_Logger.Warn($"[SERVER] {tpacket.Text}");
     }
 
     static void StartServer()
@@ -42,19 +48,25 @@ internal class Temp_Program
         Console.Title = "Networking server";
 
         var server = new NetworkServerWithThread(33000, 1000);
-        server.OnDataReceived += Server_OnDataReceived;
+        server.OnPacketReceived += Server_OnDataReceived;
 
         Temp_Logger.Info($"Started server at {server.Ip}:{server.Port}");
 
         while (true)
         {
             string input = Console.ReadLine()!;
-            server.Broadcast(Encoding.UTF8.GetBytes(input));
+            server.Broadcast(new TextPacket()
+            {
+                Text = input
+            });
         }
     }
 
-    private static void Server_OnDataReceived(string ip, byte[] data)
+    private static void Server_OnDataReceived(string ip, BasePacket packet)
     {
-        Temp_Logger.Warn($"[{ip}] {Encoding.UTF8.GetString(data)}");
+        if (packet is not TextPacket tpacket)
+            throw new Exception("only text");
+
+        Temp_Logger.Warn($"[{ip}] {tpacket.Text}");
     }
 }
