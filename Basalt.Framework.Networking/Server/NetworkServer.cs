@@ -22,8 +22,9 @@ public class NetworkServer
         _listener.Server.NoDelay = true;
         _listener.Start();
 
-        Ip = _listener.LocalEndpoint.ToString()!;
-        Port = port;
+        string[] parts = _listener.LocalEndpoint.ToString()!.Split(':');
+        Ip = parts[0];
+        Port = int.Parse(parts[1]);
 
         IsActive = true;
     }
