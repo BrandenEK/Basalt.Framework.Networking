@@ -32,20 +32,20 @@ public class NetworkClient
 
     public void Send(byte[] data)
     {
+        CheckConnectionStatus();
+
         if (!IsActive)
             throw new NetworkSendException();
-
-        CheckConnectionStatus();
 
         _client.GetStream().Write(data, 0, data.Length);
     }
 
     public void Receive()
     {
+        CheckConnectionStatus();
+
         if (!IsActive)
             throw new NetworkReceiveException();
-
-        CheckConnectionStatus();
 
         if (_client.Available == 0)
             return;
@@ -61,7 +61,6 @@ public class NetworkClient
         if (IsActive && !_client.Client.IsConnected())
         {
             Disconnect();
-            throw new NetworkDisconnectException();
         }
     }
 
