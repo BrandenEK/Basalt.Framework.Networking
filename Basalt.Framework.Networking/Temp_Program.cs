@@ -2,7 +2,7 @@
 
 namespace Basalt.Framework.Networking;
 
-internal class Program
+internal class Temp_Program
 {
     static void Main(string[] args)
     {
