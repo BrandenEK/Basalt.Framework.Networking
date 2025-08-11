@@ -67,6 +67,15 @@ public class NetworkServer
         }
     }
 
+    //public void Update()
+    //{
+    //    if (!IsActive)
+    //        throw new NetworkSendException();
+
+    //    foreach (var client in _clients.Values)
+    //        client.Update();
+    //}
+
     public void Receive()
     {
         if (!IsActive)

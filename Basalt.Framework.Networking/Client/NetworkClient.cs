@@ -1,5 +1,4 @@
-﻿using Basalt.Framework.Networking.Extensions;
-using Basalt.Framework.Networking.Serializers;
+﻿using Basalt.Framework.Networking.Serializers;
 using System.Net.Sockets;
 
 namespace Basalt.Framework.Networking.Client;
@@ -16,7 +15,7 @@ public class NetworkClient
 
     public NetworkClient(string ip, int port)
     {
-        _client = new QueuedTcpClient(ip, port);
+        _client = new QueuedTcpClient(new TcpClient(ip, port));
         IsActive = true;
 
         Ip = ip;
@@ -53,19 +52,16 @@ public class NetworkClient
         if (!IsActive)
             throw new NetworkReceiveException();
 
-        if (_client.Available == 0)
+        if (!_client.TryReceive(out byte[] data))
             return;
 
-        byte[] buffer = new byte[_client.Available];
-        _client.Client.Receive(buffer, 0, buffer.Length, SocketFlags.None);
-
-        foreach (var packet in _serializer.Deserialize(buffer))
+        foreach (var packet in _serializer.Deserialize(data))
             OnPacketReceived?.Invoke(packet);
     }
 
     private void CheckConnectionStatus()
     {
-        if (IsActive && !_client.Client.IsConnected())
+        if (IsActive && !_client.IsConnected)
         {
             Disconnect();
         }
