@@ -57,8 +57,8 @@ public class NetworkClient
         byte[] buffer = new byte[_client.Available];
         _client.Client.Receive(buffer, 0, buffer.Length, SocketFlags.None);
 
-        BasePacket packet = _serializer.Deserialize(buffer);
-        OnPacketReceived?.Invoke(packet);
+        foreach (var packet in _serializer.Deserialize(buffer))
+            OnPacketReceived?.Invoke(packet);
     }
 
     private void CheckConnectionStatus()

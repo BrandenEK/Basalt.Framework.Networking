@@ -12,9 +12,8 @@ public class NetworkServer
     private readonly ISerializer _serializer = new SimpleTextSerializer();
 
     private readonly TcpListener _listener;
-    public bool IsActive { get; private set; }
-
     private readonly Dictionary<string, TcpClient> _clients = new();
+    public bool IsActive { get; private set; }
 
     public string Ip { get; }
     public int Port { get; }
@@ -93,9 +92,9 @@ public class NetworkServer
 
             byte[] buffer = new byte[kvp.Value.Available];
             kvp.Value.Client.Receive(buffer, 0, buffer.Length, SocketFlags.None);
-            
-            BasePacket packet = _serializer.Deserialize(buffer);
-            OnPacketReceived?.Invoke(kvp.Key, packet);
+
+            foreach (var packet in _serializer.Deserialize(buffer))
+                OnPacketReceived?.Invoke(kvp.Key, packet);
         }
     }
 
