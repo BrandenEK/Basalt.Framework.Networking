@@ -1,10 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Basalt.Framework.Networking.Serializers;
 
 public class SimpleTextSerializer : ISerializer
 {
+    private readonly List<IPacketSerializer> _serializers = [];
+
+    public SimpleTextSerializer()
+    {
+        _serializers.Add(new TextPacketSerializer());
+    }
+
     public IEnumerable<BasePacket> Deserialize(byte[] data)
     {
         string text = Encoding.UTF8.GetString(data);
@@ -43,4 +51,26 @@ public class SimpleTextSerializer : ISerializer
 public class TextPacket : BasePacket
 {
     public string Text { get; set; } = string.Empty;
+}
+
+public class TextPacketSerializer : IPacketSerializer
+{
+    public int PacketId { get; } = 0;
+
+    public Type PacketType { get; } = typeof(TextPacket);
+
+    public BasePacket Deserialize(string[] data)
+    {
+        return new TextPacket()
+        {
+            Text = data[0]
+        };
+    }
+
+    public object[] Serialize(BasePacket packet)
+    {
+        TextPacket tpacket = (TextPacket)packet;
+
+        return [tpacket.Text];
+    }
 }
