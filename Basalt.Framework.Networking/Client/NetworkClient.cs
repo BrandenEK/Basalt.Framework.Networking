@@ -25,9 +25,10 @@ public class NetworkClient
 
     public void Disconnect()
     {
-        _client.Close();
-
         IsActive = false;
+
+        _client.Close();
+        OnDisconnected?.Invoke();
     }
 
     public void Send(BasePacket packet)
@@ -67,6 +68,9 @@ public class NetworkClient
             Disconnect();
         }
     }
+
+    public delegate void ConnectDelegate();
+    public event ConnectDelegate? OnDisconnected;
 
     public delegate void ReceiveDelegate(BasePacket packet);
     public event ReceiveDelegate? OnPacketReceived;

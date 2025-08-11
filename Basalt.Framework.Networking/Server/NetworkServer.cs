@@ -32,12 +32,12 @@ public class NetworkServer
 
     public void Stop()
     {
+        IsActive = false;
+
         foreach (var client in _clients.Values)
             client.Close();
         _clients.Clear();
         _listener.Stop();
-
-        IsActive = false;
     }
 
     public void Send(string ip, BasePacket packet)
@@ -95,15 +95,20 @@ public class NetworkServer
 
     private void ConnectClient(TcpClient client)
     {
-        _clients.Add(client.Client.RemoteEndPoint!.ToString()!, new QueuedTcpClient(client));
-        Temp_Logger.Warn($"Accepting new client: {client.Client.RemoteEndPoint}");
+        string ip = client.Client.RemoteEndPoint!.ToString()!;
+        _clients.Add(ip, new QueuedTcpClient(client));
+        OnClientConnected?.Invoke(ip);
     }
 
     private void DisconnectClient(string ip)
     {
-        Temp_Logger.Warn($"Client has been disconnected: {ip}");
         _clients.Remove(ip);
+        OnClientDisconnected?.Invoke(ip);
     }
+
+    public delegate void ConnectDelegate(string ip);
+    public event ConnectDelegate? OnClientConnected;
+    public event ConnectDelegate? OnClientDisconnected;
 
     public delegate void ReceiveDelegate(string ip, BasePacket packet);
     public event ReceiveDelegate? OnPacketReceived;
