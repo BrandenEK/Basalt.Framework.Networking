@@ -18,3 +18,8 @@ public class NetworkDisconnectException : NetworkException
 {
     public NetworkDisconnectException() : base("Disconnected from remote connection") { }
 }
+
+public class NetworkDataException : NetworkException
+{
+    public NetworkDataException(string message) : base(message) { }
+}

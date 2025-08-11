@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Basalt.Framework.Networking.Serializers;
@@ -11,6 +12,7 @@ public class SimpleTextSerializer : ISerializer
     public SimpleTextSerializer()
     {
         _serializers.Add(new TextPacketSerializer());
+        _serializers.Add(new TestDataPacketSerializer());
     }
 
     public IEnumerable<BasePacket> Deserialize(byte[] data)
@@ -30,10 +32,17 @@ public class SimpleTextSerializer : ISerializer
             string part = text.Substring(start, end - start);
             start = end + 1;
 
-            packets.Add(new TextPacket()
-            {
-                Text = part,
-            });
+            Temp_Logger.Error("Deserializing " + part);
+            string[] parts = part.Split(':');
+            int id = int.Parse(parts[0]);
+
+            IPacketSerializer? serializer = _serializers.FirstOrDefault(x => x.PacketId == id);
+
+            if (serializer == null)
+                throw new NetworkDataException($"Can not serialize packet id {id}");
+
+            BasePacket packet = serializer.Deserialize(parts[1..]);
+            packets.Add(packet);
         }
 
         return packets;
@@ -41,10 +50,16 @@ public class SimpleTextSerializer : ISerializer
 
     public byte[] Serialize(BasePacket packet)
     {
-        if (packet is not TextPacket tpacket)
-            throw new System.Exception("Only text packets");
+        IPacketSerializer? serializer = _serializers.FirstOrDefault(x => x.PacketType == packet.GetType());
 
-        return Encoding.UTF8.GetBytes(tpacket.Text + '/');
+        if (serializer == null)
+            throw new NetworkDataException($"Can not serialize packet type {packet.GetType().Name}");
+
+        object[] data = serializer.Serialize(packet);
+        string text = $"{serializer.PacketId}:{string.Join(':', data)}/";
+
+        Temp_Logger.Error("Serialized to " +  text);
+        return Encoding.UTF8.GetBytes(text);
     }
 }
 
@@ -72,5 +87,43 @@ public class TextPacketSerializer : IPacketSerializer
         TextPacket tpacket = (TextPacket)packet;
 
         return [tpacket.Text];
+    }
+}
+
+public class TestDataPacket : BasePacket
+{
+    public string Name { get; set; } = string.Empty;
+
+    public int Points { get; set; } = 0;
+
+    public DateTime TimeStamp { get; set; }
+}
+
+public class TestDataPacketSerializer : IPacketSerializer
+{
+    public int PacketId { get; } = 9;
+
+    public Type PacketType { get; } = typeof(TestDataPacket);
+
+    public BasePacket Deserialize(string[] data)
+    {
+        return new TestDataPacket()
+        {
+            Name = data[0],
+            Points = int.Parse(data[1]),
+            TimeStamp = new DateTime(long.Parse(data[2])),
+        };
+    }
+
+    public object[] Serialize(BasePacket packet)
+    {
+        TestDataPacket tpacket = (TestDataPacket)packet;
+
+        return
+        [
+            tpacket.Name,
+            tpacket.Points,
+            tpacket.TimeStamp.Ticks,
+        ];
     }
 }

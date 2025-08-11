@@ -29,6 +29,18 @@ internal class Temp_Program
         while (true)
         {
             string input = Console.ReadLine()!;
+
+            if (input == "test")
+            {
+                client.Send(new TestDataPacket()
+                {
+                    Name = Environment.MachineName,
+                    Points = 33000,
+                    TimeStamp = DateTime.Now,
+                });
+                continue;
+            }
+
             client.Send(new TextPacket()
             {
                 Text = input
@@ -44,10 +56,17 @@ internal class Temp_Program
 
     private static void Client_OnDataReceived(BasePacket packet)
     {
-        if (packet is not TextPacket tpacket)
-            throw new Exception("only text");
+        if (packet is TextPacket tpacket)
+        {
+            Temp_Logger.Warn($"[SERVER] {tpacket.Text}");
+            return;
+        }
 
-        Temp_Logger.Warn($"[SERVER] {tpacket.Text}");
+        if (packet is TestDataPacket datapacket)
+        {
+            Temp_Logger.Info($"Data from {datapacket.Name}: {datapacket.TimeStamp.ToShortDateString()}");
+            return;
+        }
     }
 
     static void StartServer()
@@ -64,6 +83,18 @@ internal class Temp_Program
         while (true)
         {
             string input = Console.ReadLine()!;
+
+            if (input == "test")
+            {
+                server.Broadcast(new TestDataPacket()
+                {
+                    Name = Environment.MachineName,
+                    Points = 33000,
+                    TimeStamp = DateTime.Now,
+                });
+                continue;
+            }
+
             server.Broadcast(new TextPacket()
             {
                 Text = input
@@ -83,9 +114,16 @@ internal class Temp_Program
 
     private static void Server_OnDataReceived(string ip, BasePacket packet)
     {
-        if (packet is not TextPacket tpacket)
-            throw new Exception("only text");
-
-        Temp_Logger.Warn($"[{ip}] {tpacket.Text}");
+        if (packet is TextPacket tpacket)
+        {
+            Temp_Logger.Warn($"[{ip}] {tpacket.Text}");
+            return;
+        }
+        
+        if (packet is TestDataPacket datapacket)
+        {
+            Temp_Logger.Info($"Data from {datapacket.Name}: {datapacket.TimeStamp.ToShortDateString()}");
+            return;
+        }
     }
 }
