@@ -8,7 +8,7 @@ public class NetworkClient
 {
     private readonly ISerializer _serializer = new SimpleTextSerializer();
 
-    private readonly TcpClient _client;
+    private readonly QueuedTcpClient _client;
     public bool IsActive { get; private set; }
 
     public string Ip { get; }
@@ -16,14 +16,11 @@ public class NetworkClient
 
     public NetworkClient(string ip, int port)
     {
-        _client = new TcpClient(ip, port);
-        _client.NoDelay = true;
-        _client.Client.NoDelay = true;
+        _client = new QueuedTcpClient(ip, port);
+        IsActive = true;
 
         Ip = ip;
         Port = port;
-
-        IsActive = true;
     }
 
     public void Disconnect()
@@ -35,13 +32,18 @@ public class NetworkClient
 
     public void Send(BasePacket packet)
     {
+        byte[] data = _serializer.Serialize(packet);
+        _client.Enqueue(data);
+    }
+
+    public void Update()
+    {
         CheckConnectionStatus();
 
         if (!IsActive)
             throw new NetworkSendException();
 
-        byte[] data = _serializer.Serialize(packet);
-        _client.GetStream().Write(data, 0, data.Length);
+        _client.Update();
     }
 
     public void Receive()

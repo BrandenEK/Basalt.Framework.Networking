@@ -26,6 +26,7 @@ public class NetworkClientWithThread : NetworkClient
     {
         while (IsActive)
         {
+            Update();
             Receive();
             Thread.Sleep(_readInterval);
         }
