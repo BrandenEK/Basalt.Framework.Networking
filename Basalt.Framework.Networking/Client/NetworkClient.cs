@@ -16,10 +16,11 @@ public class NetworkClient
     public NetworkClient(string ip, int port)
     {
         _client = new QueuedTcpClient(new TcpClient(ip, port));
-        IsActive = true;
 
         Ip = ip;
         Port = port;
+
+        IsActive = true;
     }
 
     public void Disconnect()

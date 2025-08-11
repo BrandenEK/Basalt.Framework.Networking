@@ -26,6 +26,7 @@ public class NetworkServerWithThread : NetworkServer
     {
         while (IsActive)
         {
+            Update();
             Receive();
             Thread.Sleep(_readInterval);
         }

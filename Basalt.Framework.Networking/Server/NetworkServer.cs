@@ -1,5 +1,4 @@
-﻿using Basalt.Framework.Networking.Extensions;
-using Basalt.Framework.Networking.Serializers;
+﻿using Basalt.Framework.Networking.Serializers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -12,7 +11,7 @@ public class NetworkServer
     private readonly ISerializer _serializer = new SimpleTextSerializer();
 
     private readonly TcpListener _listener;
-    private readonly Dictionary<string, TcpClient> _clients = new();
+    private readonly Dictionary<string, QueuedTcpClient> _clients = [];
     public bool IsActive { get; private set; }
 
     public string Ip { get; }
@@ -43,38 +42,28 @@ public class NetworkServer
 
     public void Send(string ip, BasePacket packet)
     {
-        if (!IsActive)
-            throw new NetworkSendException();
-
         byte[] data = _serializer.Serialize(packet);
 
-        if (_clients.TryGetValue(ip, out TcpClient? client))
-        {
-            client.GetStream().Write(data, 0, data.Length);
-        }
+        if (_clients.TryGetValue(ip, out QueuedTcpClient? client))
+            client.Enqueue(data);
     }
 
     public void Broadcast(BasePacket packet)
     {
-        if (!IsActive)
-            throw new NetworkSendException();
-
         byte[] data = _serializer.Serialize(packet);
 
         foreach (var client in _clients.Values)
-        {
-            client.GetStream().Write(data, 0, data.Length);
-        }
+            client.Enqueue(data);
     }
 
-    //public void Update()
-    //{
-    //    if (!IsActive)
-    //        throw new NetworkSendException();
+    public void Update()
+    {
+        if (!IsActive)
+            throw new NetworkSendException();
 
-    //    foreach (var client in _clients.Values)
-    //        client.Update();
-    //}
+        foreach (var client in _clients.Values)
+            client.Update();
+    }
 
     public void Receive()
     {
@@ -88,7 +77,7 @@ public class NetworkServer
         }
 
         // Remove all clients that have been disconnected
-        foreach (string ip in _clients.Where(kvp => !kvp.Value.Client.IsConnected()).Select(kvp => kvp.Key))
+        foreach (string ip in _clients.Where(kvp => !kvp.Value.IsConnected).Select(kvp => kvp.Key))
         {
             DisconnectClient(ip);
         }
@@ -96,22 +85,17 @@ public class NetworkServer
         // Read data from all client streams
         foreach (var kvp in _clients)
         {
-            if (kvp.Value.Available == 0)
+            if (!kvp.Value.TryReceive(out byte[] data))
                 continue;
 
-            byte[] buffer = new byte[kvp.Value.Available];
-            kvp.Value.Client.Receive(buffer, 0, buffer.Length, SocketFlags.None);
-
-            foreach (var packet in _serializer.Deserialize(buffer))
+            foreach (var packet in _serializer.Deserialize(data))
                 OnPacketReceived?.Invoke(kvp.Key, packet);
         }
     }
 
     private void ConnectClient(TcpClient client)
     {
-        client.NoDelay = true;
-        client.Client.NoDelay = true;
-        _clients.Add(client.Client.RemoteEndPoint!.ToString()!, client);
+        _clients.Add(client.Client.RemoteEndPoint!.ToString()!, new QueuedTcpClient(client));
         Temp_Logger.Warn($"Accepting new client: {client.Client.RemoteEndPoint}");
     }
 
@@ -120,9 +104,6 @@ public class NetworkServer
         Temp_Logger.Warn($"Client has been disconnected: {ip}");
         _clients.Remove(ip);
     }
-
-    //public delegate void ReceiveDelegate(string ip, byte[] data);
-    //public event ReceiveDelegate? OnDataReceived;
 
     public delegate void ReceiveDelegate(string ip, BasePacket packet);
     public event ReceiveDelegate? OnPacketReceived;
