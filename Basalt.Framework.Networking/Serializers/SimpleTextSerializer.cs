@@ -32,7 +32,6 @@ public class SimpleTextSerializer : ISerializer
             string part = text.Substring(start, end - start);
             start = end + 1;
 
-            Temp_Logger.Error("Deserializing " + part);
             string[] parts = part.Split(':');
             int id = int.Parse(parts[0]);
 
@@ -58,7 +57,6 @@ public class SimpleTextSerializer : ISerializer
         object[] data = serializer.Serialize(packet);
         string text = $"{serializer.PacketId}:{string.Join(':', data)}/";
 
-        Temp_Logger.Error("Serialized to " +  text);
         return Encoding.UTF8.GetBytes(text);
     }
 }

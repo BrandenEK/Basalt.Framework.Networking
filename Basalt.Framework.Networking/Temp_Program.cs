@@ -34,7 +34,7 @@ internal class Temp_Program
             {
                 client.Send(new TestDataPacket()
                 {
-                    Name = Environment.MachineName,
+                    Name = string.Empty,
                     Points = 33000,
                     TimeStamp = DateTime.Now,
                 });
