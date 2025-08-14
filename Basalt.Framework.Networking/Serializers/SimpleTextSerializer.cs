@@ -1,4 +1,5 @@
 ﻿using Basalt.Framework.Networking.Packets;
+using Basalt.Framework.Networking.PacketSerializers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Text;
 
 namespace Basalt.Framework.Networking.Serializers;
 
-public class SimpleTextSerializer : ISerializer
+public class SimpleTextSerializer : IMessageSerializer
 {
     private readonly List<IPacketSerializerLegacy> _serializers = [];
 

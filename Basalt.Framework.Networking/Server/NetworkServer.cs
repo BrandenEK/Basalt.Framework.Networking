@@ -8,7 +8,7 @@ namespace Basalt.Framework.Networking.Server;
 
 public class NetworkServer
 {
-    private readonly ISerializer _serializer = new ClassicSerializer();
+    private readonly IMessageSerializer _serializer = new ClassicSerializer();
 
     private readonly TcpListener _listener;
     private readonly Dictionary<string, QueuedTcpClient> _clients = [];

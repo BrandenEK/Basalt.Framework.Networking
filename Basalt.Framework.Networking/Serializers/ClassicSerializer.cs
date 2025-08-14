@@ -1,12 +1,12 @@
 ﻿using Basalt.Framework.Networking.Packets;
+using Basalt.Framework.Networking.PacketSerializers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Basalt.Framework.Networking.Serializers;
 
-public class ClassicSerializer : ISerializer
+public class ClassicSerializer : IMessageSerializer
 {
     private readonly List<PacketSerializerInfo> _serializers = [];
 
@@ -47,7 +47,6 @@ public class ClassicSerializer : ISerializer
         byte[] length = BitConverter.GetBytes((ushort)data.Length);
 
         return [.. length, info.PacketId, .. data ];
-
     }
 
     public IEnumerable<BasePacket> Deserialize(byte[] data)
@@ -58,66 +57,10 @@ public class ClassicSerializer : ISerializer
         {
             ushort length = BitConverter.ToUInt16(data, startIdx);
             byte type = data[startIdx + 2];
-            byte[] bytes = data[(startIdx + 3)..(startIdx + 3 + length)];
-            startIdx += 3 + length;
+            byte[] bytes = data[(startIdx += 3)..(startIdx += length)];
 
             PacketSerializerInfo info = FindPacketSerializer(type);
             yield return info.Serializer.Deserialize(bytes);
-        }
-    }
-
-
-
-
-
-    public class TextPacketSerializer : IPacketSerializer
-    {
-        public byte[] Serialize(BasePacket packet)
-        {
-            TextPacket p = (TextPacket)packet;
-
-            byte[] bytes = Encoding.UTF8.GetBytes(p.Text);
-            return [(byte)bytes.Length, .. bytes];
-        }
-
-        public BasePacket Deserialize(byte[] data)
-        {
-            byte length = data[0];
-            string text = Encoding.UTF8.GetString(data, 1, length);
-
-            return new TextPacket()
-            {
-                Text = text
-            };
-        }
-    }
-
-    public class TestDataPacketSerializer : IPacketSerializer
-    {
-        public byte[] Serialize(BasePacket packet)
-        {
-            TestDataPacket p = (TestDataPacket)packet;
-
-            byte[] name = Encoding.UTF8.GetBytes(p.Name);
-            byte[] points = BitConverter.GetBytes(p.Points);
-            byte[] time = BitConverter.GetBytes(p.TimeStamp.Ticks);
-
-            return [(byte)name.Length, .. name, .. points, .. time];
-        }
-
-        public BasePacket Deserialize(byte[] data)
-        {
-            byte length = data[0];
-            string name = Encoding.UTF8.GetString(data, 1, length);
-            int points = BitConverter.ToInt32(data, 1 + length);
-            long ticks = BitConverter.ToInt64(data, 5 + length);
-
-            return new TestDataPacket()
-            {
-                Name = name,
-                Points = points,
-                TimeStamp = new DateTime(ticks)
-            };
         }
     }
 

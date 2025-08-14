@@ -2,7 +2,7 @@
 
 namespace Basalt.Framework.Networking.Serializers;
 
-public interface ISerializer
+public interface IMessageSerializer
 {
     public byte[] Serialize(BasePacket packet);
 
