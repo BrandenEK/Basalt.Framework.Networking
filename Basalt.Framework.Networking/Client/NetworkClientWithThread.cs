@@ -4,30 +4,27 @@ namespace Basalt.Framework.Networking.Client;
 
 public class NetworkClientWithThread : NetworkClient
 {
-    private readonly Thread _thread;
     private readonly int _readInterval;
 
     public NetworkClientWithThread(string ip, int port, int readInterval) : base(ip, port)
     {
-        _thread = StartReadThread();
         _readInterval = readInterval;
+        StartReadThread();
     }
 
-    private Thread StartReadThread()
+    private void StartReadThread()
     {
-        Thread thread = new Thread(ReadLoop);
+        var thread = new Thread(ReadLoop);
         thread.IsBackground = true;
         thread.Start();
-
-        return thread;
     }
 
     private void ReadLoop()
     {
         while (IsActive)
         {
-            Update();
             Receive();
+            Update();
             Thread.Sleep(_readInterval);
         }
     }
