@@ -1,5 +1,5 @@
 ﻿using Basalt.Framework.Networking.Client;
-using Basalt.Framework.Networking.Serializers;
+using Basalt.Framework.Networking.Packets;
 using Basalt.Framework.Networking.Server;
 using System;
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Basalt.Framework.Networking.Packets;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -59,69 +60,55 @@ public class SimpleTextSerializer : ISerializer
 
         return Encoding.UTF8.GetBytes(text);
     }
-}
 
-public class TextPacket : BasePacket
-{
-    public string Text { get; set; } = string.Empty;
-}
-
-public class TextPacketSerializer : IPacketSerializer
-{
-    public int PacketId { get; } = 0;
-
-    public Type PacketType { get; } = typeof(TextPacket);
-
-    public BasePacket Deserialize(string[] data)
+    public class TextPacketSerializer : IPacketSerializer
     {
-        return new TextPacket()
+        public int PacketId { get; } = 0;
+
+        public Type PacketType { get; } = typeof(TextPacket);
+
+        public BasePacket Deserialize(string[] data)
         {
-            Text = data[0]
-        };
-    }
+            return new TextPacket()
+            {
+                Text = data[0]
+            };
+        }
 
-    public object[] Serialize(BasePacket packet)
-    {
-        TextPacket tpacket = (TextPacket)packet;
-
-        return [tpacket.Text];
-    }
-}
-
-public class TestDataPacket : BasePacket
-{
-    public string Name { get; set; } = string.Empty;
-
-    public int Points { get; set; } = 0;
-
-    public DateTime TimeStamp { get; set; }
-}
-
-public class TestDataPacketSerializer : IPacketSerializer
-{
-    public int PacketId { get; } = 9;
-
-    public Type PacketType { get; } = typeof(TestDataPacket);
-
-    public BasePacket Deserialize(string[] data)
-    {
-        return new TestDataPacket()
+        public object[] Serialize(BasePacket packet)
         {
-            Name = data[0],
-            Points = int.Parse(data[1]),
-            TimeStamp = new DateTime(long.Parse(data[2])),
-        };
+            TextPacket tpacket = (TextPacket)packet;
+
+            return [tpacket.Text];
+        }
     }
 
-    public object[] Serialize(BasePacket packet)
+    public class TestDataPacketSerializer : IPacketSerializer
     {
-        TestDataPacket tpacket = (TestDataPacket)packet;
+        public int PacketId { get; } = 9;
 
-        return
-        [
-            tpacket.Name,
-            tpacket.Points,
-            tpacket.TimeStamp.Ticks,
-        ];
+        public Type PacketType { get; } = typeof(TestDataPacket);
+
+        public BasePacket Deserialize(string[] data)
+        {
+            return new TestDataPacket()
+            {
+                Name = data[0],
+                Points = int.Parse(data[1]),
+                TimeStamp = new DateTime(long.Parse(data[2])),
+            };
+        }
+
+        public object[] Serialize(BasePacket packet)
+        {
+            TestDataPacket tpacket = (TestDataPacket)packet;
+
+            return
+            [
+                tpacket.Name,
+                tpacket.Points,
+                tpacket.TimeStamp.Ticks,
+            ];
+        }
     }
 }
