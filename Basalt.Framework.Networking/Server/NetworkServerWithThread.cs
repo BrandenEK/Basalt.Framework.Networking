@@ -4,30 +4,27 @@ namespace Basalt.Framework.Networking.Server;
 
 public class NetworkServerWithThread : NetworkServer
 {
-    private readonly Thread _thread;
     private readonly int _readInterval;
 
     public NetworkServerWithThread(int port, int readInterval) : base(port)
     {
-        _thread = StartReadThread();
         _readInterval = readInterval;
+        StartReadThread();
     }
 
-    private Thread StartReadThread()
+    private void StartReadThread()
     {
-        Thread thread = new Thread(ReadLoop);
+        var thread = new Thread(ReadLoop);
         thread.IsBackground = true;
         thread.Start();
-
-        return thread;
     }
 
     private void ReadLoop()
     {
         while (IsActive)
         {
-            Update();
             Receive();
+            Update();
             Thread.Sleep(_readInterval);
         }
     }

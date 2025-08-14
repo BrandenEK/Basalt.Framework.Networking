@@ -7,18 +7,23 @@ public static class Temp_Logger
     public static void Info(object message)
     {
         Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine(message);
+        Print(message);
     }
 
     public static void Warn(object message)
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine(message);
+        Print(message);
     }
 
     public static void Error(object message)
     {
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(message);
+        Print(message);
+    }
+
+    public static void Print(object message)
+    {
+        Console.WriteLine($"[{DateTime.UtcNow:HH:mm:ss}] {message}");
     }
 }

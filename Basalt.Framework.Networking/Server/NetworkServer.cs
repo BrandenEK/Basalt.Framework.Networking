@@ -48,6 +48,17 @@ public class NetworkServer
             client.Enqueue(data);
     }
 
+    public void Send(IEnumerable<string> ips, BasePacket packet)
+    {
+        byte[] data = _serializer.Serialize(packet);
+
+        foreach (string ip in ips)
+        {
+            if (_clients.TryGetValue(ip, out QueuedTcpClient? client))
+                client.Enqueue(data);
+        }
+    }
+
     public void Broadcast(BasePacket packet)
     {
         byte[] data = _serializer.Serialize(packet);
