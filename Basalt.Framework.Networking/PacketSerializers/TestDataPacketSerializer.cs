@@ -1,6 +1,6 @@
 ﻿using Basalt.Framework.Networking.Packets;
+using Basalt.Framework.Networking.Streams;
 using System;
-using System.Text;
 
 namespace Basalt.Framework.Networking.PacketSerializers;
 
@@ -10,19 +10,21 @@ public class TestDataPacketSerializer : IPacketSerializer
     {
         TestDataPacket p = (TestDataPacket)packet;
 
-        byte[] name = Encoding.UTF8.GetBytes(p.Name);
-        byte[] points = BitConverter.GetBytes(p.Points);
-        byte[] time = BitConverter.GetBytes(p.TimeStamp.Ticks);
+        var stream = new OutStream();
+        stream.Write_string(p.Name);
+        stream.Write_int(p.Points);
+        stream.Write_long(p.TimeStamp.Ticks);
 
-        return [(byte)name.Length, .. name, .. points, .. time];
+        return stream;
     }
 
     public BasePacket Deserialize(byte[] data)
     {
-        byte length = data[0];
-        string name = Encoding.UTF8.GetString(data, 1, length);
-        int points = BitConverter.ToInt32(data, 1 + length);
-        long ticks = BitConverter.ToInt64(data, 5 + length);
+        var stream = new InStream(data);
+
+        string name = stream.Read_string();
+        int points = stream.Read_int();
+        long ticks = stream.Read_long();
 
         return new TestDataPacket()
         {

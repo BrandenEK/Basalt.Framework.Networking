@@ -11,7 +11,10 @@ public class InStream
     private readonly byte[] _bytes;
     private int _pointer = 0;
 
-    private InStream(byte[] bytes)
+    public int Size => _bytes.Length;
+    public int Remaining => _bytes.Length - _pointer;
+
+    public InStream(byte[] bytes)
     {
         _bytes = bytes;
     }

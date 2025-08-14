@@ -11,6 +11,8 @@ public class OutStream
 {
     private readonly List<byte> _bytes = [];
 
+    public int Size => _bytes.Count;
+
     /// <summary>
     /// Writes a byte to the stream
     /// </summary>

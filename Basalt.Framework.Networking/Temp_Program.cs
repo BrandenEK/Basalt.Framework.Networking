@@ -99,7 +99,8 @@ internal class Temp_Program
 
             if (input == "speed")
             {
-                ClassicSerializer serializer = new ClassicSerializer();
+                ClassicSerializer serializer1 = new ClassicSerializer();
+                StreamSerializer serializer2 = new StreamSerializer();
 
                 TestDataPacket packet = new TestDataPacket()
                 {
@@ -112,20 +113,38 @@ internal class Temp_Program
                 Stopwatch watch = Stopwatch.StartNew();
                 for (int i = 0; i < 100000; i++)
                 {
-                    serializer.Serialize(packet);
+                    serializer1.Serialize(packet);
                 }
 
                 watch.Stop();
-                Temp_Logger.Info($"Serialization time: {watch.ElapsedTicks} ticks");
+                Temp_Logger.Info($"Serialization 1 time: {watch.ElapsedTicks} ticks");
 
                 watch.Restart();
                 for (int i = 0; i < 100000; i++)
                 {
-                    serializer.Deserialize(bytes);
+                    serializer2.Serialize(packet);
                 }
 
                 watch.Stop();
-                Temp_Logger.Info($"Deserialization time: {watch.ElapsedTicks} ticks");
+                Temp_Logger.Info($"Serialization 2 time: {watch.ElapsedTicks} ticks");
+
+                watch.Restart();
+                for (int i = 0; i < 100000; i++)
+                {
+                    serializer1.Deserialize(bytes);
+                }
+
+                watch.Stop();
+                Temp_Logger.Info($"Deserialization 1 time: {watch.ElapsedTicks} ticks");
+
+                watch.Restart();
+                for (int i = 0; i < 100000; i++)
+                {
+                    serializer2.Deserialize(bytes);
+                }
+
+                watch.Stop();
+                Temp_Logger.Info($"Deserialization 2 time: {watch.ElapsedTicks} ticks");
                 continue;
             }
 
