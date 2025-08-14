@@ -8,7 +8,7 @@ namespace Basalt.Framework.Networking.Serializers;
 
 public class SimpleTextSerializer : ISerializer
 {
-    private readonly List<IPacketSerializer> _serializers = [];
+    private readonly List<IPacketSerializerLegacy> _serializers = [];
 
     public SimpleTextSerializer()
     {
@@ -36,7 +36,7 @@ public class SimpleTextSerializer : ISerializer
             string[] parts = part.Split(':');
             int id = int.Parse(parts[0]);
 
-            IPacketSerializer? serializer = _serializers.FirstOrDefault(x => x.PacketId == id);
+            IPacketSerializerLegacy? serializer = _serializers.FirstOrDefault(x => x.PacketId == id);
 
             if (serializer == null)
                 throw new NetworkDataException($"Can not serialize packet id {id}");
@@ -50,7 +50,7 @@ public class SimpleTextSerializer : ISerializer
 
     public byte[] Serialize(BasePacket packet)
     {
-        IPacketSerializer? serializer = _serializers.FirstOrDefault(x => x.PacketType == packet.GetType());
+        IPacketSerializerLegacy? serializer = _serializers.FirstOrDefault(x => x.PacketType == packet.GetType());
 
         if (serializer == null)
             throw new NetworkDataException($"Can not serialize packet type {packet.GetType().Name}");
@@ -61,7 +61,7 @@ public class SimpleTextSerializer : ISerializer
         return Encoding.UTF8.GetBytes(text);
     }
 
-    public class TextPacketSerializer : IPacketSerializer
+    public class TextPacketSerializer : IPacketSerializerLegacy
     {
         public int PacketId { get; } = 0;
 
@@ -83,7 +83,7 @@ public class SimpleTextSerializer : ISerializer
         }
     }
 
-    public class TestDataPacketSerializer : IPacketSerializer
+    public class TestDataPacketSerializer : IPacketSerializerLegacy
     {
         public int PacketId { get; } = 9;
 

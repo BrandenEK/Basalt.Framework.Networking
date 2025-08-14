@@ -5,7 +5,7 @@ namespace Basalt.Framework.Networking.Client;
 
 public class NetworkClient
 {
-    private readonly ISerializer _serializer = new SimpleTextSerializer();
+    private readonly ISerializer _serializer = new ClassicSerializer();
 
     private readonly QueuedTcpClient _client;
     public bool IsActive { get; private set; }
