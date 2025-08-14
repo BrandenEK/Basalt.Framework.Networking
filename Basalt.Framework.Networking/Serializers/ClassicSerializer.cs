@@ -46,7 +46,7 @@ public class ClassicSerializer : IMessageSerializer
         byte[] data = info.Serializer.Serialize(packet);
         byte[] length = BitConverter.GetBytes((ushort)data.Length);
 
-        return [.. length, info.PacketId, .. data ];
+        return [.. length, info.PacketId, .. data];
     }
 
     public IEnumerable<BasePacket> Deserialize(byte[] data)

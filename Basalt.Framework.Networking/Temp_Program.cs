@@ -1,7 +1,9 @@
 ﻿using Basalt.Framework.Networking.Client;
 using Basalt.Framework.Networking.Packets;
+using Basalt.Framework.Networking.Serializers;
 using Basalt.Framework.Networking.Server;
 using System;
+using System.Diagnostics;
 
 namespace Basalt.Framework.Networking;
 
@@ -94,6 +96,39 @@ internal class Temp_Program
                 });
                 continue;
             }
+
+            if (input == "speed")
+            {
+                ClassicSerializer serializer = new ClassicSerializer();
+
+                TestDataPacket packet = new TestDataPacket()
+                {
+                    Name = "Test",
+                    Points = 12345,
+                    TimeStamp = DateTime.Now,
+                };
+                byte[] bytes = [0x11, 0x00, 0x09, 0x04, 0x54, 0x65, 0x73, 0x74, 0x39, 0x30, 0x00, 0x00, 0x05, 0x18, 0xDF, 0x76, 0xC5, 0xDA, 0xDD, 0x08];
+
+                Stopwatch watch = Stopwatch.StartNew();
+                for (int i = 0; i < 100000; i++)
+                {
+                    serializer.Serialize(packet);
+                }
+
+                watch.Stop();
+                Temp_Logger.Info($"Serialization time: {watch.ElapsedTicks} ticks");
+
+                watch.Restart();
+                for (int i = 0; i < 100000; i++)
+                {
+                    serializer.Deserialize(bytes);
+                }
+
+                watch.Stop();
+                Temp_Logger.Info($"Deserialization time: {watch.ElapsedTicks} ticks");
+                continue;
+            }
+
 
             server.Broadcast(new TextPacket()
             {
