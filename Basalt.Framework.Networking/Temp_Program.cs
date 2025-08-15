@@ -22,9 +22,12 @@ internal class Temp_Program
     {
         Console.Title = "Networking client";
 
-        var client = new NetworkClientWithThread("localhost", 33000, 1000);
+        var client = new NetworkClientWithThread(1000);
         client.OnPacketReceived += Client_OnDataReceived;
+        client.OnConnected += Client_OnConnected;
         client.OnDisconnected += Client_OnDisconnected;
+
+        client.Connect("localhost", 33000);
 
         Temp_Logger.Info($"Connected client to {client.Ip}:{client.Port}");
 
@@ -48,6 +51,11 @@ internal class Temp_Program
                 Text = input
             });
         }
+    }
+
+    private static void Client_OnConnected()
+    {
+        Temp_Logger.Info("Connected to server");
     }
 
     private static void Client_OnDisconnected()

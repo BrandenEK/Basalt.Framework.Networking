@@ -7,27 +7,42 @@ public class NetworkClient
 {
     private readonly IMessageSerializer _serializer = new ClassicSerializer();
 
-    private readonly QueuedTcpClient _client;
+    private QueuedTcpClient _client;
+
+    public string Ip { get; private set; }
+    public int Port { get; private set; }
     public bool IsActive { get; private set; }
 
-    public string Ip { get; }
-    public int Port { get; }
+    //public NetworkClient(string ip, int port)
+    //{
+    //    _client = new QueuedTcpClient(new TcpClient(ip, port));
 
-    public NetworkClient(string ip, int port)
+    //    Ip = ip;
+    //    Port = port;
+
+    //    IsActive = true;
+    //}
+
+    public void Connect(string ip, int port)
     {
         _client = new QueuedTcpClient(new TcpClient(ip, port));
 
         Ip = ip;
         Port = port;
-
         IsActive = true;
+
+        OnConnected?.Invoke();
     }
 
     public void Disconnect()
     {
+        _client.Close();
+        _client = null;
+
+        Ip = string.Empty;
+        Port = -1;
         IsActive = false;
 
-        _client.Close();
         OnDisconnected?.Invoke();
     }
 
@@ -37,28 +52,30 @@ public class NetworkClient
         _client.Enqueue(data);
     }
 
-    public void Update()
+    public bool Update()
     {
         CheckConnectionStatus();
 
         if (!IsActive)
-            throw new NetworkSendException();
+            return false;
 
         _client.Update();
+        return true;
     }
 
-    public void Receive()
+    public bool Receive()
     {
         CheckConnectionStatus();
 
         if (!IsActive)
-            throw new NetworkReceiveException();
+            return false;
 
         if (!_client.TryReceive(out byte[] data))
-            return;
+            return true;
 
         foreach (var packet in _serializer.Deserialize(data))
             OnPacketReceived?.Invoke(packet);
+        return true;
     }
 
     private void CheckConnectionStatus()
@@ -70,8 +87,9 @@ public class NetworkClient
     }
 
     public delegate void ConnectDelegate();
-    public event ConnectDelegate? OnDisconnected;
+    public event ConnectDelegate OnConnected;
+    public event ConnectDelegate OnDisconnected;
 
     public delegate void ReceiveDelegate(BasePacket packet);
-    public event ReceiveDelegate? OnPacketReceived;
+    public event ReceiveDelegate OnPacketReceived;
 }
