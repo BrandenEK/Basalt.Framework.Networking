@@ -20,11 +20,12 @@ public class NetworkClient
 
         _client = new QueuedTcpClient(new TcpClient(ip, port));
 
+        string server = $"{ip}:{port}";
         Ip = ip;
         Port = port;
         IsActive = true;
 
-        OnConnected?.Invoke();
+        OnConnected?.Invoke(server);
     }
 
     public void Disconnect()
@@ -35,11 +36,12 @@ public class NetworkClient
         _client.Close();
         _client = null;
 
+        string server = $"{Ip}:{Port}";
         Ip = string.Empty;
         Port = -1;
         IsActive = false;
 
-        OnDisconnected?.Invoke();
+        OnDisconnected?.Invoke(server);
     }
 
     public bool Send(BasePacket packet)
@@ -88,7 +90,7 @@ public class NetworkClient
         }
     }
 
-    public delegate void ConnectDelegate();
+    public delegate void ConnectDelegate(string server);
     public event ConnectDelegate OnConnected;
     public event ConnectDelegate OnDisconnected;
 

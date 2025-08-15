@@ -61,14 +61,14 @@ internal class Temp_Program
         }
     }
 
-    private static void Client_OnConnected()
+    private static void Client_OnConnected(string server)
     {
-        Temp_Logger.Info("Connected to remote server");
+        Temp_Logger.Info($"Connected to {server}");
     }
 
-    private static void Client_OnDisconnected()
+    private static void Client_OnDisconnected(string server)
     {
-        Temp_Logger.Info("Disconnected from remote server");
+        Temp_Logger.Info($"Disconnected from {server}");
     }
 
     private static void Client_OnDataReceived(BasePacket packet)

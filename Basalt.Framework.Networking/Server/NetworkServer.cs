@@ -70,7 +70,7 @@ public class NetworkServer
     public void Update()
     {
         if (!IsActive)
-            throw new NetworkSendException();
+            throw new NetworkException("");
 
         foreach (var client in _clients.Values)
             client.Update();
@@ -79,7 +79,7 @@ public class NetworkServer
     public void Receive()
     {
         if (!IsActive)
-            throw new NetworkReceiveException();
+            throw new NetworkException("");
 
         // Check for new connections
         if (_listener.Pending())
