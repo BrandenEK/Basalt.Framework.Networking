@@ -27,9 +27,7 @@ internal class Temp_Program
         client.OnConnected += Client_OnConnected;
         client.OnDisconnected += Client_OnDisconnected;
 
-        client.Connect("localhost", 33000);
-
-        Temp_Logger.Info($"Connected client to {client.Ip}:{client.Port}");
+        //Temp_Logger.Info($"Connected client to {client.Ip}:{client.Port}");
 
         while (true)
         {
@@ -45,6 +43,16 @@ internal class Temp_Program
                 });
                 continue;
             }
+            if (input == "c")
+            {
+                client.Connect("localhost", 33000);
+                continue;
+            }
+            if (input == "d")
+            {
+                client.Disconnect();
+                continue;
+            }
 
             client.Send(new TextPacket()
             {
@@ -55,13 +63,12 @@ internal class Temp_Program
 
     private static void Client_OnConnected()
     {
-        Temp_Logger.Info("Connected to server");
+        Temp_Logger.Info("Connected to remote server");
     }
 
     private static void Client_OnDisconnected()
     {
-        // This probably never happens because it throws an error first
-        Temp_Logger.Info("Disconnected from server");
+        Temp_Logger.Info("Disconnected from remote server");
     }
 
     private static void Client_OnDataReceived(BasePacket packet)

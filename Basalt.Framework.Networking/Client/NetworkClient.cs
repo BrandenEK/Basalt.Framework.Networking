@@ -16,7 +16,7 @@ public class NetworkClient
     public void Connect(string ip, int port)
     {
         if (IsActive)
-            throw new System.Exception("Can't connect if the client is already active");
+            throw new NetworkException("Can't connect if the client is already active");
 
         _client = new QueuedTcpClient(new TcpClient(ip, port));
 
@@ -30,7 +30,7 @@ public class NetworkClient
     public void Disconnect()
     {
         if (!IsActive)
-            throw new System.Exception("Can't disconnect if the client is already inactive");
+            throw new NetworkException("Can't disconnect if the client is already inactive");
 
         _client.Close();
         _client = null;
