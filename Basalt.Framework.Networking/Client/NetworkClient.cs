@@ -6,11 +6,12 @@ namespace Basalt.Framework.Networking.Client;
 public class NetworkClient
 {
     private readonly IMessageSerializer _serializer;
+
     private QueuedTcpClient _client;
 
-    public string Ip { get; private set; }
-    public int Port { get; private set; }
-    public bool IsActive { get; private set; }
+    public string Ip { get; private set; } = string.Empty;
+    public int Port { get; private set; } = -1;
+    public bool IsActive { get; private set; } = false;
 
     public NetworkClient(IMessageSerializer serializer)
     {
@@ -24,12 +25,12 @@ public class NetworkClient
 
         _client = new QueuedTcpClient(new TcpClient(ip, port));
 
-        string server = $"{ip}:{port}";
+        string address = $"{ip}:{port}";
         Ip = ip;
         Port = port;
         IsActive = true;
 
-        OnConnected?.Invoke(server);
+        OnClientConnected?.Invoke(address);
     }
 
     public void Disconnect()
@@ -40,12 +41,12 @@ public class NetworkClient
         _client.Close();
         _client = null;
 
-        string server = $"{Ip}:{Port}";
+        string address = $"{Ip}:{Port}";
         Ip = string.Empty;
         Port = -1;
         IsActive = false;
 
-        OnDisconnected?.Invoke(server);
+        OnClientDisconnected?.Invoke(address);
     }
 
     public bool Send(BasePacket packet)
@@ -83,6 +84,7 @@ public class NetworkClient
 
         foreach (var packet in _serializer.Deserialize(data))
             OnPacketReceived?.Invoke(packet);
+
         return true;
     }
 
@@ -94,9 +96,9 @@ public class NetworkClient
         }
     }
 
-    public delegate void ConnectDelegate(string server);
-    public event ConnectDelegate OnConnected;
-    public event ConnectDelegate OnDisconnected;
+    public delegate void ClientDelegate(string ip);
+    public event ClientDelegate OnClientConnected;
+    public event ClientDelegate OnClientDisconnected;
 
     public delegate void ReceiveDelegate(BasePacket packet);
     public event ReceiveDelegate OnPacketReceived;

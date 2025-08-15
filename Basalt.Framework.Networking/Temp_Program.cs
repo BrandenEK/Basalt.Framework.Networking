@@ -24,10 +24,8 @@ internal class Temp_Program
 
         var client = new NetworkClientWithThread(1000, new ClassicSerializer());
         client.OnPacketReceived += Client_OnDataReceived;
-        client.OnConnected += Client_OnConnected;
-        client.OnDisconnected += Client_OnDisconnected;
-
-        //Temp_Logger.Info($"Connected client to {client.Ip}:{client.Port}");
+        client.OnClientConnected += Client_OnConnected;
+        client.OnClientDisconnected += Client_OnDisconnected;
 
         while (true)
         {
@@ -61,14 +59,14 @@ internal class Temp_Program
         }
     }
 
-    private static void Client_OnConnected(string server)
+    private static void Client_OnConnected(string ip)
     {
-        Temp_Logger.Info($"Connected to {server}");
+        Temp_Logger.Info($"Connected to {ip}");
     }
 
-    private static void Client_OnDisconnected(string server)
+    private static void Client_OnDisconnected(string ip)
     {
-        Temp_Logger.Info($"Disconnected from {server}");
+        Temp_Logger.Info($"Disconnected from {ip}");
     }
 
     private static void Client_OnDataReceived(BasePacket packet)
@@ -90,12 +88,14 @@ internal class Temp_Program
     {
         Console.Title = "Networking server";
 
-        var server = new NetworkServerWithThread(33000, 1000);
+        var server = new NetworkServerWithThread(new ClassicSerializer(), 1000);
         server.OnPacketReceived += Server_OnDataReceived;
+        server.OnServerStarted += Server_OnServerStarted;
+        server.OnServerStopped += Server_OnServerStopped;
         server.OnClientConnected += Server_OnClientConnected;
         server.OnClientDisconnected += Server_OnClientDisconnected;
 
-        Temp_Logger.Info($"Started server at {server.Ip}:{server.Port}");
+        server.Start(33000);
 
         while (true)
         {
@@ -171,14 +171,24 @@ internal class Temp_Program
         }
     }
 
+    private static void Server_OnServerStopped(string ip)
+    {
+        Temp_Logger.Info($"Stopped server at {ip}");
+    }
+
+    private static void Server_OnServerStarted(string ip)
+    {
+        Temp_Logger.Info($"Started server at {ip}");
+    }
+
     private static void Server_OnClientDisconnected(string ip)
     {
-        Temp_Logger.Info($"Client disconnected: {ip}");
+        Temp_Logger.Info($"Client disconnected at {ip}");
     }
 
     private static void Server_OnClientConnected(string ip)
     {
-        Temp_Logger.Info($"Client connected: {ip}");
+        Temp_Logger.Info($"Client connected at {ip}");
     }
 
     private static void Server_OnDataReceived(string ip, BasePacket packet)
