@@ -5,13 +5,17 @@ namespace Basalt.Framework.Networking.Client;
 
 public class NetworkClient
 {
-    private readonly IMessageSerializer _serializer = new ClassicSerializer();
-
+    private readonly IMessageSerializer _serializer;
     private QueuedTcpClient _client;
 
     public string Ip { get; private set; }
     public int Port { get; private set; }
     public bool IsActive { get; private set; }
+
+    public NetworkClient(IMessageSerializer serializer)
+    {
+        _serializer = serializer;
+    }
 
     public void Connect(string ip, int port)
     {

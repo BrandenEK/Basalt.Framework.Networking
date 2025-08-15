@@ -22,7 +22,7 @@ internal class Temp_Program
     {
         Console.Title = "Networking client";
 
-        var client = new NetworkClientWithThread(1000);
+        var client = new NetworkClientWithThread(1000, new ClassicSerializer());
         client.OnPacketReceived += Client_OnDataReceived;
         client.OnConnected += Client_OnConnected;
         client.OnDisconnected += Client_OnDisconnected;
