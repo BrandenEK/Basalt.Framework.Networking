@@ -40,7 +40,7 @@ public class SimpleTextSerializer : IMessageSerializer
             IPacketSerializerLegacy serializer = _serializers.FirstOrDefault(x => x.PacketId == id);
 
             if (serializer == null)
-                throw new NetworkDataException($"Can not serialize packet id {id}");
+                throw new NetworkException($"Can not serialize packet id {id}");
 
             BasePacket packet = serializer.Deserialize(parts[1..]);
             packets.Add(packet);
@@ -54,7 +54,7 @@ public class SimpleTextSerializer : IMessageSerializer
         IPacketSerializerLegacy serializer = _serializers.FirstOrDefault(x => x.PacketType == packet.GetType());
 
         if (serializer == null)
-            throw new NetworkDataException($"Can not serialize packet type {packet.GetType().Name}");
+            throw new NetworkException($"Can not serialize packet type {packet.GetType().Name}");
 
         object[] data = serializer.Serialize(packet);
         string text = $"{serializer.PacketId}:{string.Join(':', data)}/";

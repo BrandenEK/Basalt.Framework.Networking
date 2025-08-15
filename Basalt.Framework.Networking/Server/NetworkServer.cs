@@ -147,7 +147,7 @@ public class NetworkServer
 
     private void ConnectClient(TcpClient client)
     {
-        string ip = client.Client.RemoteEndPoint!.ToString()!;
+        string ip = client.Client.RemoteEndPoint.ToString();
         _clients.Add(ip, new QueuedTcpClient(client));
         OnClientConnected?.Invoke(ip);
     }
