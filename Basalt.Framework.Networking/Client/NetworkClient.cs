@@ -5,60 +5,87 @@ namespace Basalt.Framework.Networking.Client;
 
 public class NetworkClient
 {
-    private readonly IMessageSerializer _serializer = new ClassicSerializer();
+    private readonly IMessageSerializer _serializer;
 
-    private readonly QueuedTcpClient _client;
-    public bool IsActive { get; private set; }
+    private QueuedTcpClient _client;
 
-    public string Ip { get; }
-    public int Port { get; }
+    public string Ip { get; private set; } = string.Empty;
+    public int Port { get; private set; } = -1;
+    public bool IsActive { get; private set; } = false;
 
-    public NetworkClient(string ip, int port)
+    public NetworkClient(IMessageSerializer serializer)
     {
+        _serializer = serializer;
+    }
+
+    public void Connect(string ip, int port)
+    {
+        if (IsActive)
+            throw new NetworkException("Can't connect if the client is already active");
+
         _client = new QueuedTcpClient(new TcpClient(ip, port));
 
+        string address = $"{ip}:{port}";
         Ip = ip;
         Port = port;
-
         IsActive = true;
+
+        OnClientConnected?.Invoke(address);
     }
 
     public void Disconnect()
     {
-        IsActive = false;
+        if (!IsActive)
+            throw new NetworkException("Can't disconnect if the client is already inactive");
 
         _client.Close();
-        OnDisconnected?.Invoke();
+        _client = null;
+
+        string address = $"{Ip}:{Port}";
+        Ip = string.Empty;
+        Port = -1;
+        IsActive = false;
+
+        OnClientDisconnected?.Invoke(address);
     }
 
-    public void Send(BasePacket packet)
+    public bool Send(BasePacket packet)
     {
+        // Don't check connection status
+
+        if (!IsActive)
+            return false;
+
         byte[] data = _serializer.Serialize(packet);
         _client.Enqueue(data);
+        return true;
     }
 
-    public void Update()
+    public bool Update()
     {
         CheckConnectionStatus();
 
         if (!IsActive)
-            throw new NetworkSendException();
+            return false;
 
         _client.Update();
+        return true;
     }
 
-    public void Receive()
+    public bool Receive()
     {
         CheckConnectionStatus();
 
         if (!IsActive)
-            throw new NetworkReceiveException();
+            return false;
 
         if (!_client.TryReceive(out byte[] data))
-            return;
+            return true;
 
         foreach (var packet in _serializer.Deserialize(data))
             OnPacketReceived?.Invoke(packet);
+
+        return true;
     }
 
     private void CheckConnectionStatus()
@@ -69,9 +96,10 @@ public class NetworkClient
         }
     }
 
-    public delegate void ConnectDelegate();
-    public event ConnectDelegate? OnDisconnected;
+    public delegate void ClientDelegate(string ip);
+    public event ClientDelegate OnClientConnected;
+    public event ClientDelegate OnClientDisconnected;
 
     public delegate void ReceiveDelegate(BasePacket packet);
-    public event ReceiveDelegate? OnPacketReceived;
+    public event ReceiveDelegate OnPacketReceived;
 }

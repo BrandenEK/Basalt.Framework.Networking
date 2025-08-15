@@ -22,7 +22,7 @@ public class InStream
     private void ValidateReadLength(int size)
     {
         if (_pointer + size > _bytes.Length)
-            throw new NetworkDataException("Can not read past the length of the stream");
+            throw new NetworkException("Can not read past the length of the stream");
     }
 
     private T Read_generic<T>(int size, Func<byte[], int, T> func)

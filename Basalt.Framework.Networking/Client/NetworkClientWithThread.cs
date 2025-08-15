@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using Basalt.Framework.Networking.Serializers;
+using System.Threading;
 
 namespace Basalt.Framework.Networking.Client;
 
@@ -6,7 +7,7 @@ public class NetworkClientWithThread : NetworkClient
 {
     private readonly int _readInterval;
 
-    public NetworkClientWithThread(string ip, int port, int readInterval) : base(ip, port)
+    public NetworkClientWithThread(int readInterval, IMessageSerializer s) : base(s)
     {
         _readInterval = readInterval;
         StartReadThread();
@@ -21,10 +22,14 @@ public class NetworkClientWithThread : NetworkClient
 
     private void ReadLoop()
     {
-        while (IsActive)
+        while (true)
         {
-            Receive();
-            Update();
+            if (IsActive)
+            {
+                Receive();
+                Update();
+            }
+            
             Thread.Sleep(_readInterval);
         }
     }

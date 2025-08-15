@@ -104,7 +104,7 @@ public class OutStream
     /// <summary>
     /// Writes a string to the stream
     /// </summary>
-    public void Write_string(string? data)
+    public void Write_string(string data)
     {
         if (string.IsNullOrEmpty(data))
         {
@@ -115,7 +115,7 @@ public class OutStream
         var bytes = Encoding.UTF8.GetBytes(data);
 
         if (bytes.Length > 255)
-            throw new NetworkDataException("Can not serialize a string with more than 255 bytes");
+            throw new NetworkException("Can not serialize a string with more than 255 bytes");
 
         _bytes.Add((byte)bytes.Length);
         _bytes.AddRange(bytes);
