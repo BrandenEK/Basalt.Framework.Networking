@@ -26,7 +26,19 @@ public class NetworkClientWithThread : NetworkClient
         {
             if (IsActive)
             {
-                Receive();
+                try
+                {
+                    Receive();
+                }
+                catch (NetworkException ex)
+                {
+                    Temp_Logger.Error($"Error during deserialization: {ex.Message}");
+                }
+                catch (System.Exception ex)
+                {
+                    Temp_Logger.Info($"Error during deserialization: {ex}");
+                }
+
                 Update();
             }
             

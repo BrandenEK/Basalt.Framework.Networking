@@ -50,12 +50,19 @@ public class ClassicSerializer : IMessageSerializer
         while (startIdx < data.Length - 3)
         {
             ushort length = BitConverter.ToUInt16(data, startIdx);
+
+            if (startIdx + 3 + length > data.Length)
+                throw new NetworkException("Packet length will overflow buffer");
+
             byte type = data[startIdx + 2];
             byte[] bytes = data[(startIdx += 3)..(startIdx += length)];
 
             PacketSerializerInfo info = FindPacketSerializer(type);
             yield return info.Serializer.Deserialize(bytes);
         }
+
+        if (startIdx != data.Length)
+            throw new NetworkException("There was extraneous data in the buffer");
     }
 
     class PacketSerializerInfo(byte id, Type type, IPacketSerializer serializer)
