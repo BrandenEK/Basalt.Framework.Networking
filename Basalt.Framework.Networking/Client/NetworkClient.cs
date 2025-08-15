@@ -13,18 +13,11 @@ public class NetworkClient
     public int Port { get; private set; }
     public bool IsActive { get; private set; }
 
-    //public NetworkClient(string ip, int port)
-    //{
-    //    _client = new QueuedTcpClient(new TcpClient(ip, port));
-
-    //    Ip = ip;
-    //    Port = port;
-
-    //    IsActive = true;
-    //}
-
     public void Connect(string ip, int port)
     {
+        if (IsActive)
+            throw new System.Exception("Can't connect if the client is already active");
+
         _client = new QueuedTcpClient(new TcpClient(ip, port));
 
         Ip = ip;
@@ -36,6 +29,9 @@ public class NetworkClient
 
     public void Disconnect()
     {
+        if (!IsActive)
+            throw new System.Exception("Can't disconnect if the client is already inactive");
+
         _client.Close();
         _client = null;
 
@@ -46,10 +42,16 @@ public class NetworkClient
         OnDisconnected?.Invoke();
     }
 
-    public void Send(BasePacket packet)
+    public bool Send(BasePacket packet)
     {
+        // Don't check connection status
+
+        if (!IsActive)
+            return false;
+
         byte[] data = _serializer.Serialize(packet);
         _client.Enqueue(data);
+        return true;
     }
 
     public bool Update()
