@@ -4,7 +4,7 @@ using System.Net.Sockets;
 
 namespace Basalt.Framework.Networking;
 
-public class QueuedTcpClient
+internal class QueuedTcpClient
 {
     private readonly TcpClient _client;
     private readonly List<byte> _queue;

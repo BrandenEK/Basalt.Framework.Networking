@@ -8,8 +8,10 @@
     <Authors>Damocles</Authors>
     <Description>A networking framework for basalt applications</Description>
     <Version>1.0.0</Version>
-    
-    <OutputType>Exe</OutputType>
+
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <RepositoryUrl>https://github.com/BrandenEK/Basalt.Framework.Networking</RepositoryUrl>
   </PropertyGroup>
 
 </Project>
