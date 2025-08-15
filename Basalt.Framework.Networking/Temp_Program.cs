@@ -1,5 +1,6 @@
 ﻿using Basalt.Framework.Networking.Client;
 using Basalt.Framework.Networking.Packets;
+using Basalt.Framework.Networking.PacketSerializers;
 using Basalt.Framework.Networking.Serializers;
 using Basalt.Framework.Networking.Server;
 using System;
@@ -22,7 +23,10 @@ internal class Temp_Program
     {
         Console.Title = "Networking client";
 
-        var client = new NetworkClientWithThread(1000, new ClassicSerializer());
+        var client = new NetworkClientWithThread(1000, new ClassicSerializer()
+            .AddPacketSerializer<TextPacket>(0, new TextPacketSerializer())
+            .AddPacketSerializer<TestDataPacket>(9, new TestDataPacketSerializer()));
+
         client.OnPacketReceived += Client_OnDataReceived;
         client.OnClientConnected += Client_OnConnected;
         client.OnClientDisconnected += Client_OnDisconnected;
@@ -88,7 +92,10 @@ internal class Temp_Program
     {
         Console.Title = "Networking server";
 
-        var server = new NetworkServerWithThread(new ClassicSerializer(), 1000);
+        var server = new NetworkServerWithThread(new ClassicSerializer()
+            .AddPacketSerializer<TextPacket>(0, new TextPacketSerializer())
+            .AddPacketSerializer<TestDataPacket>(9, new TestDataPacketSerializer()), 1000);
+
         server.OnPacketReceived += Server_OnDataReceived;
         server.OnServerStarted += Server_OnServerStarted;
         server.OnServerStopped += Server_OnServerStopped;

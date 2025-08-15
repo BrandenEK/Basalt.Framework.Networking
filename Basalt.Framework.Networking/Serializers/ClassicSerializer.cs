@@ -1,5 +1,4 @@
-﻿using Basalt.Framework.Networking.Packets;
-using Basalt.Framework.Networking.PacketSerializers;
+﻿using Basalt.Framework.Networking.PacketSerializers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,13 +9,7 @@ public class ClassicSerializer : IMessageSerializer
 {
     private readonly List<PacketSerializerInfo> _serializers = [];
 
-    public ClassicSerializer()
-    {
-        AddPacketSerializer<TextPacket>(0, new TextPacketSerializer());
-        AddPacketSerializer<TestDataPacket>(9, new TestDataPacketSerializer());
-    }
-
-    private void AddPacketSerializer<TPacket>(byte id, IPacketSerializer serializer) where TPacket : BasePacket
+    public ClassicSerializer AddPacketSerializer<TPacket>(byte id, IPacketSerializer serializer) where TPacket : BasePacket
     {
         if (_serializers.Any(x => x.PacketId == id))
             throw new NetworkException($"A packet serializer for id {id} has already been registered");
@@ -25,6 +18,7 @@ public class ClassicSerializer : IMessageSerializer
             throw new NetworkException($"A packet serializer for type {typeof(TPacket).Name} has already been registered");
 
         _serializers.Add(new PacketSerializerInfo(id, typeof(TPacket), serializer));
+        return this;
     }
 
     private PacketSerializerInfo FindPacketSerializer(byte id)
@@ -56,12 +50,19 @@ public class ClassicSerializer : IMessageSerializer
         while (startIdx < data.Length - 3)
         {
             ushort length = BitConverter.ToUInt16(data, startIdx);
+
+            if (startIdx + 3 + length > data.Length)
+                throw new NetworkException("Packet length will overflow buffer");
+
             byte type = data[startIdx + 2];
             byte[] bytes = data[(startIdx += 3)..(startIdx += length)];
 
             PacketSerializerInfo info = FindPacketSerializer(type);
             yield return info.Serializer.Deserialize(bytes);
         }
+
+        if (startIdx != data.Length)
+            throw new NetworkException("There was extraneous data in the buffer");
     }
 
     class PacketSerializerInfo(byte id, Type type, IPacketSerializer serializer)
