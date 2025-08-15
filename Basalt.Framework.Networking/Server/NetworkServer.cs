@@ -69,7 +69,7 @@ public class NetworkServer
 
         byte[] data = _serializer.Serialize(packet);
 
-        if (_clients.TryGetValue(ip, out QueuedTcpClient? client))
+        if (_clients.TryGetValue(ip, out QueuedTcpClient client))
             client.Enqueue(data);
 
         return true;
@@ -84,7 +84,7 @@ public class NetworkServer
 
         foreach (string ip in ips)
         {
-            if (_clients.TryGetValue(ip, out QueuedTcpClient? client))
+            if (_clients.TryGetValue(ip, out QueuedTcpClient client))
                 client.Enqueue(data);
         }
 

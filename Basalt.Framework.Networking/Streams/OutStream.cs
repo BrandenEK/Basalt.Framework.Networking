@@ -104,7 +104,7 @@ public class OutStream
     /// <summary>
     /// Writes a string to the stream
     /// </summary>
-    public void Write_string(string? data)
+    public void Write_string(string data)
     {
         if (string.IsNullOrEmpty(data))
         {
