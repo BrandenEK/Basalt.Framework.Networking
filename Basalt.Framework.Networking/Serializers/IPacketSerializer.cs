@@ -1,5 +1,5 @@
 ﻿
-namespace Basalt.Framework.Networking.PacketSerializers;
+namespace Basalt.Framework.Networking.Serializers;
 
 public interface IPacketSerializer
 {
