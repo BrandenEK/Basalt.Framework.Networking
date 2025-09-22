@@ -117,6 +117,15 @@ public class InStream
     }
 
     /// <summary>
+    /// Reads the next bool in the stream
+    /// </summary>
+    public bool Read_bool()
+    {
+        ValidateReadLength(1);
+        return _bytes[_pointer++] == 1;
+    }
+
+    /// <summary>
     /// Reads the next char in the stream
     /// </summary>
     public char Read_char()
