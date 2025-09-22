@@ -1,0 +1,27 @@
+
+name: Build
+
+on:
+  push:
+    tags: [ "**" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Build Project
+      run: |
+        dotnet restore
+        dotnet build --configuration Release --no-restore
+
+    - name: Upload Nuget
+      run: dotnet nuget push **\*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
