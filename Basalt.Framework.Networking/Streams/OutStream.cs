@@ -94,6 +94,14 @@ public class OutStream
     }
 
     /// <summary>
+    /// Writes a bool to the stream
+    /// </summary>
+    public void Write_bool(bool data)
+    {
+        _bytes.Add((byte)(data ? 1 : 0));
+    }
+
+    /// <summary>
     /// Writes a char to the stream
     /// </summary>
     public void Write_char(char data)
