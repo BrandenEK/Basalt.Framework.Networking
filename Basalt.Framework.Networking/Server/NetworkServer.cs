@@ -139,8 +139,15 @@ public class NetworkServer
             if (!kvp.Value.TryReceive(out byte[] data))
                 continue;
 
-            foreach (var packet in _serializer.Deserialize(data))
-                OnPacketReceived?.Invoke(kvp.Key, packet);
+            try
+            {
+                foreach (var packet in _serializer.Deserialize(data))
+                    OnPacketReceived?.Invoke(kvp.Key, packet);
+            }
+            catch (NetworkException ex)
+            {
+                OnErrorReceived?.Invoke(kvp.Key, ex);
+            }
         }
 
         return true;

@@ -83,8 +83,15 @@ public class NetworkClient
         if (!_client.TryReceive(out byte[] data))
             return true;
 
-        foreach (var packet in _serializer.Deserialize(data))
-            OnPacketReceived?.Invoke(packet);
+        try
+        {
+            foreach (var packet in _serializer.Deserialize(data))
+                OnPacketReceived?.Invoke(packet);
+        }
+        catch (NetworkException ex)
+        {
+            OnErrorReceived?.Invoke(ex);
+        }
 
         return true;
     }
