@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Basalt.Framework.Networking.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -123,7 +124,7 @@ public class OutStream
         var bytes = Encoding.UTF8.GetBytes(data);
 
         if (bytes.Length > 255)
-            throw new NetworkException("Can not serialize a string with more than 255 bytes");
+            throw new SerializationException("Can not serialize a string with more than 255 bytes", data);
 
         _bytes.Add((byte)bytes.Length);
         _bytes.AddRange(bytes);

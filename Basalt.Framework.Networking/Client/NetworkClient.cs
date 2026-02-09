@@ -1,4 +1,5 @@
-﻿using Basalt.Framework.Networking.Serializers;
+﻿using Basalt.Framework.Networking.Exceptions;
+using Basalt.Framework.Networking.Serializers;
 using System.Net.Sockets;
 
 namespace Basalt.Framework.Networking.Client;
@@ -21,7 +22,7 @@ public class NetworkClient
     public void Connect(string ip, int port)
     {
         if (IsActive)
-            throw new NetworkException("Can't connect if the client is already active");
+            throw new ListenerStatusException("Can't connect if the client is already active");
 
         _client = new QueuedTcpClient(new TcpClient(ip, port));
 
@@ -36,7 +37,7 @@ public class NetworkClient
     public void Disconnect()
     {
         if (!IsActive)
-            throw new NetworkException("Can't disconnect if the client is already inactive");
+            throw new ListenerStatusException("Can't disconnect if the client is already inactive");
 
         _client.Close();
         _client = null;

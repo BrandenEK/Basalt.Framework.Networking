@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Basalt.Framework.Networking.Exceptions;
+using System;
 using System.Text;
 
 namespace Basalt.Framework.Networking.Streams;
@@ -22,7 +23,7 @@ public class InStream
     private void ValidateReadLength(int size)
     {
         if (_pointer + size > _bytes.Length)
-            throw new NetworkException("Can not read past the length of the stream");
+            throw new DeserializationException("Can not read past the length of the stream", _bytes);
     }
 
     private T Read_generic<T>(int size, Func<byte[], int, T> func)
