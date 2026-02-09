@@ -12,10 +12,10 @@ public class ClassicSerializer : IMessageSerializer
     public ClassicSerializer AddPacketSerializer<TPacket>(byte id, IPacketSerializer serializer) where TPacket : BasePacket
     {
         if (_serializers.Any(x => x.PacketId == id))
-            throw new NetworkException($"A packet serializer for id {id} has already been registered");
+            throw new PacketRegistryException($"id={id}");
 
         if (_serializers.Any(x => x.PacketType == typeof(TPacket)))
-            throw new NetworkException($"A packet serializer for type {typeof(TPacket).Name} has already been registered");
+            throw new PacketRegistryException($"type={typeof(TPacket).Name}");
 
         _serializers.Add(new PacketSerializerInfo(id, typeof(TPacket), serializer));
         return this;
@@ -30,7 +30,7 @@ public class ClassicSerializer : IMessageSerializer
     private PacketSerializerInfo FindPacketSerializer(Type type)
     {
         return _serializers.FirstOrDefault(x => x.PacketType == type)
-            ?? throw new UnknownPacketTypeException($"type={type}");
+            ?? throw new UnknownPacketTypeException($"type={type.Name}");
     }
 
     public byte[] Serialize(BasePacket packet)
