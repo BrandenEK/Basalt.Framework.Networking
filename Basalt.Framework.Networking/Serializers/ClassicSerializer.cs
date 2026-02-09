@@ -9,7 +9,7 @@ public class ClassicSerializer : IMessageSerializer
 {
     private readonly List<PacketSerializerInfo> _serializers = [];
 
-    public ClassicSerializer AddPacketSerializer<TPacket>(byte id, IPacketSerializer serializer) where TPacket : BasePacket
+    public ClassicSerializer RegisterPacket<TPacket>(byte id, IPacketSerializer serializer) where TPacket : BasePacket
     {
         if (_serializers.Any(x => x.PacketId == id))
             throw new PacketRegistryException($"id={id}");
@@ -18,6 +18,18 @@ public class ClassicSerializer : IMessageSerializer
             throw new PacketRegistryException($"type={typeof(TPacket).Name}");
 
         _serializers.Add(new PacketSerializerInfo(id, typeof(TPacket), serializer));
+        return this;
+    }
+
+    public ClassicSerializer RegisterPacket<TPacket>(byte id, Func<BasePacket> creator) where TPacket : BasePacket
+    {
+        if (_serializers.Any(x => x.PacketId == id))
+            throw new PacketRegistryException($"A packet serializer for id {id} has already been registered");
+
+        if (_serializers.Any(x => x.PacketType == typeof(TPacket)))
+            throw new PacketRegistryException($"A packet serializer for type {typeof(TPacket).Name} has already been registered");
+
+        _serializers.Add(new PacketSerializerInfo(id, typeof(TPacket), new ReflectionPacketSerializer(creator)));
         return this;
     }
 
