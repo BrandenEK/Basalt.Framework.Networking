@@ -34,8 +34,8 @@ public class NetworkServer
         _listener.Start();
 
         string address = _listener.LocalEndpoint.ToString();
-        Ip = address[..address.IndexOf(':')];
-        Port = int.Parse(address[(address.IndexOf(':') + 1)..]);
+        Ip = address.Substring(0, address.IndexOf(':'));
+        Port = int.Parse(address.Substring(address.IndexOf(':') + 1));
         IsActive = true;
 
         OnServerStarted?.Invoke(address);

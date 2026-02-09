@@ -54,7 +54,11 @@ public class ClassicSerializer : IMessageSerializer
                 throw new NetworkException("Packet length will overflow buffer");
 
             byte type = data[startIdx + 2];
-            byte[] bytes = data[(startIdx += 3)..(startIdx += length)];
+            byte[] bytes = new byte[length];
+            for (int i = 0; i < length; i++)
+                bytes[i] = data[startIdx + 3 + i];
+
+            startIdx += 3 + length;
 
             PacketSerializerInfo info = FindPacketSerializer(type);
             yield return info.Serializer.Deserialize(bytes);
