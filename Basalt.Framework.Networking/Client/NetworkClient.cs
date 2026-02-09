@@ -62,7 +62,7 @@ public class NetworkClient
         return true;
     }
 
-    public bool Update()
+    public bool Flush()
     {
         CheckConnectionStatus();
 

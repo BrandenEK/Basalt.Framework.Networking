@@ -105,7 +105,7 @@ public class NetworkServer
         return true;
     }
 
-    public bool Update()
+    public bool Flush()
     {
         if (!IsActive)
             return false;
