@@ -7,7 +7,7 @@
     <Title>Basalt Networking Framework</Title>
     <Authors>Damocles</Authors>
     <Description>A networking framework for basalt applications</Description>
-    <Version>1.0.0</Version>
+    <Version>2.0.0</Version>
 
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
