@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Basalt.Framework.Networking.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -51,7 +52,7 @@ public class ClassicSerializer : IMessageSerializer
             ushort length = BitConverter.ToUInt16(data, startIdx);
 
             if (startIdx + 3 + length > data.Length)
-                throw new NetworkException("Packet length will overflow buffer");
+                throw new DeserializationException("Packet length will overflow buffer", data);
 
             byte type = data[startIdx + 2];
             byte[] bytes = new byte[length];
@@ -65,7 +66,7 @@ public class ClassicSerializer : IMessageSerializer
         }
 
         if (startIdx != data.Length)
-            throw new NetworkException("There was extraneous data in the buffer");
+            throw new DeserializationException("There was extraneous data in the buffer", data);
     }
 
     class PacketSerializerInfo(byte id, Type type, IPacketSerializer serializer)
