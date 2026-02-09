@@ -24,13 +24,13 @@ public class ClassicSerializer : IMessageSerializer
     private PacketSerializerInfo FindPacketSerializer(byte id)
     {
         return _serializers.FirstOrDefault(x => x.PacketId == id)
-            ?? throw new NetworkException($"There is no registered packet serializer for packet id {id}");
+            ?? throw new UnknownPacketTypeException($"id={id}");
     }
 
     private PacketSerializerInfo FindPacketSerializer(Type type)
     {
         return _serializers.FirstOrDefault(x => x.PacketType == type)
-            ?? throw new NetworkException($"There is no registered packet serializer for packet type {type}");
+            ?? throw new UnknownPacketTypeException($"type={type}");
     }
 
     public byte[] Serialize(BasePacket packet)
