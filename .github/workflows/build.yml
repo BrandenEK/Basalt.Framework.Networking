@@ -1,4 +1,5 @@
 
+# Basalt application publisher v1.0.1
 name: Build
 
 on:
@@ -22,6 +23,7 @@ jobs:
       run: |
         dotnet restore
         dotnet build --configuration Release --no-restore
+        dotnet test --configuration Release --no-build
 
     - name: Upload Nuget
       run: dotnet nuget push **\*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
