@@ -1,4 +1,5 @@
-﻿using Basalt.Framework.Networking.Serializers;
+﻿using Basalt.Framework.Networking.Exceptions;
+using Basalt.Framework.Networking.Serializers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -25,7 +26,7 @@ public class NetworkServer
     public void Start(int port)
     {
         if (IsActive)
-            throw new NetworkException("Can't start if the server is already active");
+            throw new ListenerStatusException("Can't start if the server is already active");
 
         _clients = [];
 
@@ -44,7 +45,7 @@ public class NetworkServer
     public void Stop()
     {
         if (!IsActive)
-            throw new NetworkException("Can't stop if the server is already inactive");
+            throw new ListenerStatusException("Can't stop if the server is already inactive");
 
         foreach (var client in _clients.Values)
             client.Close();
