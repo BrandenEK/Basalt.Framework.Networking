@@ -139,8 +139,15 @@ public class NetworkServer
             if (!kvp.Value.TryReceive(out byte[] data))
                 continue;
 
-            foreach (var packet in _serializer.Deserialize(data))
-                OnPacketReceived?.Invoke(kvp.Key, packet);
+            try
+            {
+                foreach (var packet in _serializer.Deserialize(data))
+                    OnPacketReceived?.Invoke(kvp.Key, packet);
+            }
+            catch (NetworkException ex)
+            {
+                OnErrorReceived?.Invoke(kvp.Key, ex);
+            }
         }
 
         return true;
@@ -167,6 +174,9 @@ public class NetworkServer
     public event ClientDelegate OnClientConnected;
     public event ClientDelegate OnClientDisconnected;
 
-    public delegate void ReceiveDelegate(string ip, BasePacket packet);
-    public event ReceiveDelegate OnPacketReceived;
+    public delegate void PacketDelegate(string ip, BasePacket packet);
+    public event PacketDelegate OnPacketReceived;
+
+    public delegate void ErrorDelegate(string ip, NetworkException exception);
+    public event ErrorDelegate OnErrorReceived;
 }

@@ -83,8 +83,15 @@ public class NetworkClient
         if (!_client.TryReceive(out byte[] data))
             return true;
 
-        foreach (var packet in _serializer.Deserialize(data))
-            OnPacketReceived?.Invoke(packet);
+        try
+        {
+            foreach (var packet in _serializer.Deserialize(data))
+                OnPacketReceived?.Invoke(packet);
+        }
+        catch (NetworkException ex)
+        {
+            OnErrorReceived?.Invoke(ex);
+        }
 
         return true;
     }
@@ -101,6 +108,9 @@ public class NetworkClient
     public event ClientDelegate OnClientConnected;
     public event ClientDelegate OnClientDisconnected;
 
-    public delegate void ReceiveDelegate(BasePacket packet);
-    public event ReceiveDelegate OnPacketReceived;
+    public delegate void PacketDelegate(BasePacket packet);
+    public event PacketDelegate OnPacketReceived;
+
+    public delegate void ErrorDelegate(NetworkException exception);
+    public event ErrorDelegate OnErrorReceived;
 }
