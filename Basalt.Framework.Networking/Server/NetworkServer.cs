@@ -167,6 +167,9 @@ public class NetworkServer
     public event ClientDelegate OnClientConnected;
     public event ClientDelegate OnClientDisconnected;
 
-    public delegate void ReceiveDelegate(string ip, BasePacket packet);
-    public event ReceiveDelegate OnPacketReceived;
+    public delegate void PacketDelegate(string ip, BasePacket packet);
+    public event PacketDelegate OnPacketReceived;
+
+    public delegate void ErrorDelegate(string ip, NetworkException exception);
+    public event ErrorDelegate OnErrorReceived;
 }

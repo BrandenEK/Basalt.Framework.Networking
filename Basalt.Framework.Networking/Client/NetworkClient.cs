@@ -101,6 +101,9 @@ public class NetworkClient
     public event ClientDelegate OnClientConnected;
     public event ClientDelegate OnClientDisconnected;
 
-    public delegate void ReceiveDelegate(BasePacket packet);
-    public event ReceiveDelegate OnPacketReceived;
+    public delegate void PacketDelegate(BasePacket packet);
+    public event PacketDelegate OnPacketReceived;
+
+    public delegate void ErrorDelegate(NetworkException exception);
+    public event ErrorDelegate OnErrorReceived;
 }
