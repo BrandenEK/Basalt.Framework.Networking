@@ -158,7 +158,10 @@ public class InStream
     {
         ValidateReadLength(length);
 
-        byte[] value = _bytes[_pointer..(_pointer + length)];
+        byte[] value = new byte[length];
+        for (int i = 0; i < length; i++)
+            value[i] = _bytes[_pointer + i];
+
         _pointer += length;
         return value;
     }
